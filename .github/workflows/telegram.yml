@@ -1,0 +1,42 @@
+name: Telegram message
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - closed
+    branches:
+      - main
+jobs:
+  onOpened:
+    if: ${{ github.event.action == 'opened' }}
+    name: Send telegram message on opened pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} created PR:
+            PR Title: ${{ github.event.pull_request.title }}
+            
+            Repository: ${{ github.repository }}
+            
+            See changes: https://github.com/${{ github.repository }}/pull/${{github.event.pull_request.number}}
+  onMerged:
+    if: ${{ github.event.action == 'closed' &&  github.event.pull_request.merged == true }}
+    name: Send telegram message on merged pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} merged PR:
+            PR Title: ${{ github.event.pull_request.title }}
+            
+            Repository: ${{ github.repository }}
